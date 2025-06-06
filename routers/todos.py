@@ -2,16 +2,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from ..database import sessionlocal
-from ..models import Todos
+from database import sessionlocal
+from models import Todos
 from starlette import status
-from .auth import get_current_user
+from routers.auth import get_current_user
 from starlette.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 
 router = APIRouter(prefix="/todos", tags=["todos"])
-templates = Jinja2Templates(directory="TodoApp/Templates")
+templates = Jinja2Templates(directory="Templates")
 
 
 def get_db():

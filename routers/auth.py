@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
-from ..database import sessionlocal
-from ..models import Users
+from database import sessionlocal
+from models import Users, Todos
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -45,7 +45,7 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-templates = Jinja2Templates(directory="TodoApp/templates")
+templates = Jinja2Templates(directory="templates")
 
 
 ### Pages ###
@@ -105,6 +105,15 @@ async def users(db: db_dependency):
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
+    name = (
+        db.query(Users).filter(Users.username == create_user_request.username).first()
+    )
+    email = db.query(Users).filter(Users.email == create_user_request.email).first()
+    if name is not None:
+        raise HTTPException(status_code=401, detail="user name already exist")
+    if email is not None:
+        raise HTTPException(status_code=401, detail="email already exist")
+
     create_user_model = Users(
         email=create_user_request.email,
         username=create_user_request.username,
